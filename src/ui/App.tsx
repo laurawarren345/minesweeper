@@ -1,14 +1,12 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
-import EmptySquare from './EmptySquare'
+import GameGrid from './GameGrid'
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <EmptySquare />
-      </header>
+        <GameGrid />
     </div>
   );
 }

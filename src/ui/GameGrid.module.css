@@ -1,0 +1,13 @@
+.grid {
+  top: 20px;
+}
+
+.col {
+  flex: 0;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
