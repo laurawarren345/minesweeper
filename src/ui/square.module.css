@@ -1,0 +1,10 @@
+.emptySquare {
+  height: 60px;
+  width: 60px;
+  background-color: rgb(150, 150, 150);
+  border-bottom: solid rgb(70, 70, 70);
+  border-right: solid rgb(70, 70, 70);
+  border-top: solid white;
+  border-left: solid white;
+  border-width: 6px;
+}
