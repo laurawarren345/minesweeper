@@ -1,0 +1,6 @@
+ for (var i: number = 0; i < gridSize; i++) {
+    var bar: JSX.Element = uncovered
+      ? <div className={style.col} key={i}><FilledSquare /></div>
+      : <div className={style.col} key={i}><EmptySquare /></div>
+    foo.push(bar);
+  }

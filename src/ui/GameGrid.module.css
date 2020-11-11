@@ -1,5 +1,6 @@
 .grid {
-  top: 20px;
+  position: absolute;
+  margin: 20% 20%;
 }
 
 .col {
