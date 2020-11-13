@@ -76,15 +76,19 @@ export function populateCellNumberValues(
       }
     }
   }
+
+  const incrementIfNotMine = (c: CellsObject | undefined) => {
+    if (!c) return;
+    if (c.value === "mine") return;
+    if (c.value === "flag") return;
+
+    c.value++;
+  };
+
   //For each mine, increment the surrounding cells by 1
   allMineKeys.forEach(([i, j]) => {
-    if (
-      newCells[`${i - 1},${j - 1}`] &&
-      newCells[`${i - 1},${j - 1}`].value !== "mine"
-    ) {
-      newCells[`${i - 1},${j - 1}`]["value"] =
-        <number>newCells[`${i - 1},${j - 1}`]["value"] + 1;
-    }
+    incrementIfNotMine(newCells[`${i - 1},${j - 1}`]);
+
     if (
       newCells[`${i},${j - 1}`] &&
       newCells[`${i},${j - 1}`].value !== "mine"
@@ -160,68 +164,47 @@ export function determineCellsAdjacentToZero(
   gridSize: number,
   cellKey: string,
   cells: Cells,
-  cellsToUncover: string[]
-): string[] {
-  console.log(`line 165 cellsToUncover ${cellsToUncover}`);
-  console.log(cellsToUncover);
-  const parsedKey = /^(.*),(.*)/.exec(cellKey);
+  cellsToUncover: Set<string>
+): void {
   // Break the cellKey into its constituent numbers
-  console.log(`parsed key`);
-  console.log(parsedKey);
+  const parsedKey = /^(.*),(.*)/.exec(cellKey);
 
-  if (parsedKey) {
-    const i: number = parseInt(parsedKey[1], 10);
-    const j: number = parseInt(parsedKey[2], 10);
+  if (!parsedKey) throw new Error(`Couldn't parse ${cellKey}`);
 
-    // Determine (potential) adjacent cells
-    const adjacentCellsArray: [number, number][] = [
-      [i - 1, j - 1],
-      [i, j - 1],
-      [i + 1, j - 1],
-      [i - 1, j],
-      [i + 1, j],
-      [i - 1, j + 1],
-      [i, j + 1],
-      [i + 1, j + 1],
-    ];
-    console.log(`line 187 adjacentCellsArray`);
-    console.log(adjacentCellsArray);
-    let adjacentCellKeys: string[] = <string[]>(<unknown>adjacentCellsArray
-      // Filter out any non-viable cell references
-      .filter(([a, b]) => {
-        return a > 0 && a <= gridSize && b > 0 && b <= gridSize;
-      })
-      // Map numeric duples back to cellKey strings
-      .map(([a, b]) => {
-        return `${a},${b}`;
-      })
-      // Filter out cells already on the "uncover" list
-      .filter((key) => {
-        return cellsToUncover.indexOf(<string>(<unknown>key)) < 0;
-      }));
-    console.log(`line 202 adjacenCellKeys`);
-    console.log(adjacentCellKeys);
+  const i: number = parseInt(parsedKey[1], 10);
+  const j: number = parseInt(parsedKey[2], 10);
+
+  // Determine (potential) adjacent cells
+  const adjacentCellsArray: [number, number][] = [
+    [i - 1, j - 1],
+    [i, j - 1],
+    [i + 1, j - 1],
+    [i - 1, j],
+    [i + 1, j],
+    [i - 1, j + 1],
+    [i, j + 1],
+    [i + 1, j + 1],
+  ];
+
+  adjacentCellsArray
+    // Filter out any non-viable cell references
+    .filter(([a, b]) => a > 0 && a <= gridSize && b > 0 && b <= gridSize)
+    // Map numeric duples back to cellKey strings
+    .map(([a, b]) => `${a},${b}`)
     // For each of these new cells, check if the value === 0
     // and if so call this functon recursively to determine
     // any further cells that need to be uncovered
-    adjacentCellKeys = <string[]>(<unknown>adjacentCellKeys.forEach((key) => {
-      console.log(`line 213 cell key and value`);
-      console.log(key);
-      console.log(cells[key].value);
-      cellsToUncover.push(key);
+    .forEach((key) => {
+      // Filter out cells already on the "uncover" list
+      if (cellsToUncover.has(key)) return;
+
+      cellsToUncover.add(key);
+
       if (cells[key].value === 0) {
-        return determineCellsAdjacentToZero(
-          gridSize,
-          key,
-          cells,
-          cellsToUncover
-        );
-      } else return key;
-    }));
-    //Add these cells to the list of cells to uncover
-    // cellsToUncover = cellsToUncover.concat(adjacentCellKeys);
-  }
-  console.log(`line 224`);
-  console.log(cellsToUncover);
-  return cellsToUncover;
+        determineCellsAdjacentToZero(gridSize, key, cells, cellsToUncover);
+      }
+    });
+
+  //Add these cells to the list of cells to uncover
+  // cellsToUncover = cellsToUncover.concat(adjacentCellKeys);
 }

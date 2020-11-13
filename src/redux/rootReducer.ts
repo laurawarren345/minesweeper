@@ -16,7 +16,7 @@ export interface Action {
 
 const defaultState: State = {
   cells: {},
-  gridSize: 10,
+  gridSize: 20,
 };
 
 export default function rootReducer(
@@ -38,17 +38,15 @@ export default function rootReducer(
       };
     case "SET_CELL_AS_UNCOVERED":
       // newState.cells[action.cellKey].isUncovered = true;
-      let cellsToUncover: string[] = [<string>(<unknown>action.cellKey)];
+      let cellsToUncover = new Set([action.cellKey as string]);
       if (newState.cells[action.cellKey].value === 0) {
-        cellsToUncover = determineCellsAdjacentToZero(
+        determineCellsAdjacentToZero(
           state.gridSize,
           <string>(<unknown>[action.cellKey]),
           state.cells,
           cellsToUncover
         );
       }
-      console.log(`line 50 (rootReducer)`);
-      console.log(cellsToUncover);
       cellsToUncover.forEach((key) => {
         newState.cells[key].isUncovered = true;
       });
