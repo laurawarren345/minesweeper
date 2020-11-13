@@ -1,4 +1,5 @@
-import { Cells } from "../currentGame/state";
+import * as R from "ramda";
+import { Cells, CellsObject } from "../currentGame/state";
 
 function calculateNumberOfMines(gridSize: number) {
   const x: number = gridSize * gridSize;
@@ -16,7 +17,6 @@ export function generateDummyGrid(gridSize: number): Cells {
         value: 0,
         flag: false,
       };
-      console.log(newCells[cellKey].value);
     }
   }
   return newCells;
@@ -37,7 +37,7 @@ export function populateRandomMines(cells: Cells, gridSize: number): Cells {
   );
 
   // populate the nth Cell with a mine, for each 'n' in the random number array
-  let newCells: Cells = { ...cells };
+  let newCells: Cells = R.clone(cells);
   mineLocations.forEach((mineLocation: number) => {
     for (let i = 0; i < gridSize; i++) {
       for (let j = 1; j <= gridSize; j++) {
@@ -61,7 +61,7 @@ export function populateCellNumberValues(
   cells: Cells,
   gridSize: number
 ): Cells {
-  let newCells: Cells = { ...cells };
+  let newCells: Cells = R.clone(cells);
   const allMineKeys: mineLocation[] = [];
 
   //Populate all non-mines with 0 and store mines;
@@ -148,3 +148,80 @@ function generateUniqueRandomNumbers(maxValue: number, quantity: number) {
 }
 
 type mineLocation = [number, number];
+
+export function toggleFlag(toggleCell: CellsObject): CellsObject {
+  return {
+    ...toggleCell,
+    flag: !toggleCell.flag,
+  };
+}
+
+export function determineCellsAdjacentToZero(
+  gridSize: number,
+  cellKey: string,
+  cells: Cells,
+  cellsToUncover: string[]
+): string[] {
+  console.log(`line 165 cellsToUncover ${cellsToUncover}`);
+  console.log(cellsToUncover);
+  const parsedKey = /^(.*),(.*)/.exec(cellKey);
+  // Break the cellKey into its constituent numbers
+  console.log(`parsed key`);
+  console.log(parsedKey);
+
+  if (parsedKey) {
+    const i: number = parseInt(parsedKey[1], 10);
+    const j: number = parseInt(parsedKey[2], 10);
+
+    // Determine (potential) adjacent cells
+    const adjacentCellsArray: [number, number][] = [
+      [i - 1, j - 1],
+      [i, j - 1],
+      [i + 1, j - 1],
+      [i - 1, j],
+      [i + 1, j],
+      [i - 1, j + 1],
+      [i, j + 1],
+      [i + 1, j + 1],
+    ];
+    console.log(`line 187 adjacentCellsArray`);
+    console.log(adjacentCellsArray);
+    let adjacentCellKeys: string[] = <string[]>(<unknown>adjacentCellsArray
+      // Filter out any non-viable cell references
+      .filter(([a, b]) => {
+        return a > 0 && a <= gridSize && b > 0 && b <= gridSize;
+      })
+      // Map numeric duples back to cellKey strings
+      .map(([a, b]) => {
+        return `${a},${b}`;
+      })
+      // Filter out cells already on the "uncover" list
+      .filter((key) => {
+        return cellsToUncover.indexOf(<string>(<unknown>key)) < 0;
+      }));
+    console.log(`line 202 adjacenCellKeys`);
+    console.log(adjacentCellKeys);
+    // For each of these new cells, check if the value === 0
+    // and if so call this functon recursively to determine
+    // any further cells that need to be uncovered
+    adjacentCellKeys = <string[]>(<unknown>adjacentCellKeys.forEach((key) => {
+      console.log(`line 213 cell key and value`);
+      console.log(key);
+      console.log(cells[key].value);
+      cellsToUncover.push(key);
+      if (cells[key].value === 0) {
+        return determineCellsAdjacentToZero(
+          gridSize,
+          key,
+          cells,
+          cellsToUncover
+        );
+      } else return key;
+    }));
+    //Add these cells to the list of cells to uncover
+    // cellsToUncover = cellsToUncover.concat(adjacentCellKeys);
+  }
+  console.log(`line 224`);
+  console.log(cellsToUncover);
+  return cellsToUncover;
+}

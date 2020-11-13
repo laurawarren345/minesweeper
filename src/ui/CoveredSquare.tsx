@@ -6,20 +6,29 @@ import flagPic from "../Flag.png";
 export default function CoveredSquare({ cellKey, flag }: CoveredSquareProps) {
   const dispatch = useDispatch();
 
+  document.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+  });
+
+  const displayValue: JSX.Element | null = flag ? (
+    <img src={flagPic} alt="flag" className="flag" />
+  ) : null;
+
   return (
     <button
       className={style.coveredSquare}
-      onClick={() =>
-        dispatch({ type: "SET_CELL_AS_UNCOVERED", cellKey: cellKey })
-      }
+      onClick={() => {
+        if (!flag) {
+          dispatch({ type: "SET_CELL_AS_UNCOVERED", cellKey: cellKey });
+        }
+      }}
       onMouseUp={(event) => {
         if (event.button === 2) {
-          event.preventDefault();
-          dispatch({ type: "SET_CELL_AS_FLAG", cellKey: cellKey });
+          dispatch({ type: "TOGGLE_FLAG", cellKey: cellKey });
         }
       }}
     >
-      {flag ? <img src={flagPic} alt="flag" className="flag" /> : null}
+      {displayValue}
     </button>
   );
 }

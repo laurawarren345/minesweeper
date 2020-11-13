@@ -1,7 +1,6 @@
-import React, { ElementRef } from "react";
+import React from "react";
 import { useDispatch } from "react-redux";
-import { JsxElement } from "typescript";
-import { CellsObject, CellValue } from "../redux/currentGame/state";
+import { CellValue } from "../redux/currentGame/state";
 import style from "./square.module.css";
 import mine from "../Bunny.jpg";
 
@@ -11,10 +10,10 @@ export default function UncoveredSquare({
 }: UncoveredSquareProps) {
   const dispatch = useDispatch();
 
-  const displayValue: JSX.Element | CellValue =
+  const displayValue: JSX.Element | CellValue | null =
     cellValue === "mine" ? (
       <img src={mine} alt="mine" className="mine" />
-    ) : (
+    ) : cellValue === 0 ? null : (
       cellValue
     );
 

@@ -1,16 +1,6 @@
 import { createSelector } from "reselect";
 import { State } from "../state";
-import { Cells, CellsObject } from "./state";
-
-export const selectCellFromCellId = createSelector(
-  [(state: State) => state.cells],
-  (cells: Cells) => {
-    return (cellId: string): CellsObject => {
-      const cell: CellsObject = cells[cellId];
-      return cell;
-    };
-  }
-);
+import { Cells } from "./state";
 
 export type CellDisplayValue = number | "mine" | "covered" | "flag";
 
@@ -28,7 +18,9 @@ export const selectCells = createSelector(
         const cell = cells[cellId];
         columnCells.push(
           !cell.isUncovered || cell.flag || cell.value === undefined
-            ? "covered"
+            ? (!cell.isUncovered && !cell.flag) || cell.value === undefined
+              ? "covered"
+              : "flag"
             : cell.value
         );
       }
